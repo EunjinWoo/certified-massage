@@ -39,3 +39,12 @@
 - `lng`: 경도
 - `geocodeStatus`: `pending | success | failed | skipped`
 - `sourceFetchedAt`: 마지막 수집 시각
+
+## Validation
+
+최종 dataset은 아래 명령으로 JSON Schema 기준 검증할 수 있습니다.
+
+```bash
+cd apps/crawler
+anmawon-crawler validate-dataset
+```

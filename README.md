@@ -89,6 +89,7 @@ anmawon-crawler crawl
 anmawon-crawler clean
 anmawon-crawler geocode
 anmawon-crawler build-dataset
+anmawon-crawler validate-dataset
 ```
 
 실행 결과는 루트의 `data/` 디렉터리에 저장됩니다.
