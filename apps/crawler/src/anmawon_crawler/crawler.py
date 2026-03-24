@@ -13,9 +13,13 @@ from .models import ShopRecord
 from .storage import now_iso
 
 
-BASE_URL = "https://www.anmawon.com"
+DEFAULT_BASE_URL = "https://www.anmawon.com"
 LIST_PATH = "/FindShop/List"
 DETAIL_PATH = "/FindShop/Detail"
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36"
+)
 
 NAME_KEYS = ("상호명", "업소명", "상호", "안마원명", "기관명")
 ADDRESS_KEYS = ("주소", "소재지", "도로명주소")
@@ -27,8 +31,18 @@ ADDRESS_HINT_PATTERN = re.compile(
 )
 
 
-def build_list_url(area_code: Optional[str] = None, page: int = 1) -> str:
+def normalize_base_url(base_url: str) -> str:
+    return base_url.rstrip("/")
+
+
+def build_list_url(
+    area_code: Optional[str] = None,
+    page: int = 1,
+    *,
+    base_url: str = DEFAULT_BASE_URL,
+) -> str:
     params = {}
+    normalized_base_url = normalize_base_url(base_url)
 
     if area_code:
         params["SearchArea"] = area_code
@@ -37,9 +51,9 @@ def build_list_url(area_code: Optional[str] = None, page: int = 1) -> str:
         params["page"] = str(page)
 
     if not params:
-        return urljoin(BASE_URL, LIST_PATH)
+        return urljoin(normalized_base_url, LIST_PATH)
 
-    return f"{urljoin(BASE_URL, LIST_PATH)}?{urlencode(params)}"
+    return f"{urljoin(normalized_base_url, LIST_PATH)}?{urlencode(params)}"
 
 
 def extract_query_values(text: str, key: str) -> List[str]:
@@ -82,9 +96,14 @@ def discover_page_count(soup: BeautifulSoup) -> int:
     return max(pages)
 
 
-def extract_detail_urls(soup: BeautifulSoup) -> List[str]:
+def extract_detail_urls(
+    soup: BeautifulSoup,
+    *,
+    base_url: str = DEFAULT_BASE_URL,
+) -> List[str]:
     detail_urls: List[str] = []
     seen: Set[str] = set()
+    normalized_base_url = normalize_base_url(base_url)
 
     for anchor in soup.select("a[href]"):
         href = anchor.get("href", "")
@@ -92,7 +111,7 @@ def extract_detail_urls(soup: BeautifulSoup) -> List[str]:
         if DETAIL_PATH not in href or "shopId=" not in href:
             continue
 
-        absolute_url = urljoin(BASE_URL, href)
+        absolute_url = urljoin(normalized_base_url, href)
 
         if absolute_url in seen:
             continue
@@ -198,8 +217,19 @@ def extract_phone_from_page(soup: BeautifulSoup, pairs: Dict[str, str]) -> str:
 
 
 def fetch_html(client: httpx.Client, url: str) -> BeautifulSoup:
-    response = client.get(url)
-    response.raise_for_status()
+    try:
+        response = client.get(url)
+        response.raise_for_status()
+    except httpx.HTTPStatusError as error:
+        status_code = error.response.status_code
+        raise RuntimeError(f"Failed to fetch {url} (status {status_code}).") from error
+    except httpx.HTTPError as error:
+        raise RuntimeError(
+            f"Failed to fetch {url} due to a network error: {error}. "
+            "If the live source resets the connection in your environment, "
+            "verify the URL with ANMAWON_BASE_URL or retry from a network that can reach the source."
+        ) from error
+
     return BeautifulSoup(response.text, "html.parser")
 
 
@@ -226,25 +256,28 @@ def parse_detail_page(
 def crawl_directory(
     *,
     area_codes: Optional[Iterable[str]],
+    base_url: str = DEFAULT_BASE_URL,
     request_delay: float,
     timeout: float,
+    user_agent: str = DEFAULT_USER_AGENT,
     max_pages_per_area: Optional[int] = None,
 ) -> List[ShopRecord]:
     headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36"
-        )
+        "User-Agent": user_agent or DEFAULT_USER_AGENT
     }
 
     with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers) as client:
-        root_soup = fetch_html(client, build_list_url())
+        root_soup = fetch_html(client, build_list_url(base_url=base_url))
         discovered_area_codes = discover_area_codes(root_soup)
         active_area_codes = list(area_codes) if area_codes else discovered_area_codes or [""]
         discovered_links: Dict[str, ShopRecord] = {}
 
         for area_code in active_area_codes:
-            first_page_url = build_list_url(area_code=area_code or None, page=1)
+            first_page_url = build_list_url(
+                area_code=area_code or None,
+                page=1,
+                base_url=base_url,
+            )
             list_soup = fetch_html(client, first_page_url)
             page_count = discover_page_count(list_soup)
 
@@ -252,10 +285,14 @@ def crawl_directory(
                 page_count = min(page_count, max_pages_per_area)
 
             for page in range(1, page_count + 1):
-                page_url = build_list_url(area_code=area_code or None, page=page)
+                page_url = build_list_url(
+                    area_code=area_code or None,
+                    page=page,
+                    base_url=base_url,
+                )
                 soup = list_soup if page == 1 else fetch_html(client, page_url)
 
-                for detail_url in extract_detail_urls(soup):
+                for detail_url in extract_detail_urls(soup, base_url=base_url):
                     shop_id = extract_shop_id(detail_url)
                     if not shop_id:
                         continue

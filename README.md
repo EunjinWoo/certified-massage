@@ -70,6 +70,15 @@ pip install -e .
 cp .env.example .env
 ```
 
+선택적으로 아래 값을 설정하면 실사이트 검증 환경을 더 유연하게 맞출 수 있습니다.
+
+```bash
+ANMAWON_BASE_URL=https://www.anmawon.com
+ANMAWON_USER_AGENT=Mozilla/5.0 ...
+ANMAWON_REQUEST_DELAY=1.2
+ANMAWON_TIMEOUT=20
+```
+
 ### 3. Dataset Pipeline
 
 ```bash
@@ -90,6 +99,7 @@ anmawon-crawler build-dataset
 - 데이터 스키마 초안 생성
 
 실제 셀렉터 보정과 주소 보정 규칙은 사이트 HTML을 보면서 추가로 다듬으면 됩니다.
+실사이트 연결이 네트워크 환경에 따라 실패할 수 있으므로, 파서 단위 테스트를 먼저 통과시키고 제한된 범위의 샘플 크롤링으로 검증하는 흐름을 권장합니다.
 
 ## Team Workflow
 

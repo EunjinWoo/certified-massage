@@ -55,8 +55,10 @@ def command_crawl(area_codes, max_pages_per_area: int | None) -> None:
     settings = load_settings()
     records = crawl_directory(
         area_codes=area_codes,
+        base_url=settings.anmawon_base_url,
         request_delay=settings.request_delay,
         timeout=settings.timeout,
+        user_agent=settings.anmawon_user_agent,
         max_pages_per_area=max_pages_per_area,
     )
     write_dataset(RAW_DATA_PATH, records)
