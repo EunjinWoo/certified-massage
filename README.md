@@ -83,6 +83,7 @@ ANMAWON_TIMEOUT=20
 
 ```bash
 cd apps/crawler
+anmawon-crawler probe-source
 anmawon-crawler crawl
 anmawon-crawler clean
 anmawon-crawler geocode
@@ -100,6 +101,13 @@ anmawon-crawler build-dataset
 
 실제 셀렉터 보정과 주소 보정 규칙은 사이트 HTML을 보면서 추가로 다듬으면 됩니다.
 실사이트 연결이 네트워크 환경에 따라 실패할 수 있으므로, 파서 단위 테스트를 먼저 통과시키고 제한된 범위의 샘플 크롤링으로 검증하는 흐름을 권장합니다.
+샘플 크롤링 전에 `anmawon-crawler probe-source`를 실행하면 DNS, HTTPS, HTTP fallback 상태를 먼저 확인할 수 있습니다.
+HTTPS 연결이 리셋되는 환경에서는 아래처럼 HTTP base URL과 제한된 범위를 사용해 샘플 검증을 시작할 수 있습니다.
+
+```bash
+cd apps/crawler
+ANMAWON_BASE_URL=http://www.anmawon.com anmawon-crawler crawl --area-code 031 --max-pages-per-area 1
+```
 
 ## Team Workflow
 

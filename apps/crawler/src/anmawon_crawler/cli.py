@@ -7,6 +7,7 @@ from typing import Sequence
 from .crawler import crawl_directory
 from .geocode import apply_geocoding
 from .normalize import clean_records
+from .probe import format_probe_report, run_source_probe
 from .settings import load_settings
 from .storage import (
     CLEAN_DATA_PATH,
@@ -44,6 +45,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("clean", help="Normalize addresses and text fields")
     subparsers.add_parser("geocode", help="Resolve coordinates with Kakao Local API")
+    subparsers.add_parser(
+        "probe-source",
+        help="Check live source reachability before running crawl",
+    )
     subparsers.add_parser(
         "build-dataset",
         help="Promote the latest processed file to the final dataset",
@@ -94,6 +99,16 @@ def command_geocode() -> None:
     print(f"Wrote {len(geocoded)} records to {GEOCODED_DATA_PATH}")
 
 
+def command_probe_source() -> None:
+    settings = load_settings()
+    results = run_source_probe(
+        base_url=settings.anmawon_base_url,
+        timeout=settings.timeout,
+        user_agent=settings.anmawon_user_agent,
+    )
+    print(format_probe_report(settings.anmawon_base_url, results))
+
+
 def command_build_dataset() -> None:
     source_path = GEOCODED_DATA_PATH if GEOCODED_DATA_PATH.exists() else CLEAN_DATA_PATH
     records = read_dataset(source_path)
@@ -115,6 +130,10 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "geocode":
         command_geocode()
+        return
+
+    if args.command == "probe-source":
+        command_probe_source()
         return
 
     if args.command == "build-dataset":

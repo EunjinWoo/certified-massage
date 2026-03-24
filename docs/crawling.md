@@ -17,8 +17,20 @@
 ## Validation Tips
 
 - 실사이트 연결이 안 되는 환경에서는 먼저 파서 단위 테스트로 셀렉터 로직을 검증합니다.
+- `anmawon-crawler probe-source`로 DNS, HTTPS, HTTP fallback 응답을 먼저 확인합니다.
 - 필요하면 `ANMAWON_BASE_URL`과 `ANMAWON_USER_AGENT`를 환경변수로 조정해 재시도합니다.
 - 샘플 검증은 `--max-pages-per-area` 옵션으로 범위를 제한해 진행합니다.
+
+## Live Sample Example
+
+```bash
+cd apps/crawler
+ANMAWON_BASE_URL=http://www.anmawon.com anmawon-crawler probe-source
+ANMAWON_BASE_URL=http://www.anmawon.com anmawon-crawler crawl --area-code 031 --max-pages-per-area 1
+```
+
+샘플 검증 시에는 먼저 특정 지역 코드 하나와 1페이지 범위로 시작합니다.
+현재 환경에서는 HTTPS가 연결 재설정으로 실패했고, `031` 1페이지 샘플 크롤링으로 raw 데이터 10건을 확인했습니다.
 
 ## Known Follow-up Work
 
