@@ -21,6 +21,7 @@ from .storage import (
     write_dataset,
     write_json,
 )
+from .validate import validate_dataset_file
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,6 +53,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "build-dataset",
         help="Promote the latest processed file to the final dataset",
+    )
+    subparsers.add_parser(
+        "validate-dataset",
+        help="Validate the final dataset against the JSON Schema",
     )
     return parser
 
@@ -117,6 +122,11 @@ def command_build_dataset() -> None:
     print(f"Promoted {len(records)} records from {source_path} to {FINAL_DATA_PATH}")
 
 
+def command_validate_dataset() -> None:
+    validate_dataset_file(FINAL_DATA_PATH)
+    print(f"Validated dataset at {FINAL_DATA_PATH}")
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -139,6 +149,10 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "build-dataset":
         command_build_dataset()
+        return
+
+    if args.command == "validate-dataset":
+        command_validate_dataset()
         return
 
     raise SystemExit(f"Unknown command: {args.command}")
