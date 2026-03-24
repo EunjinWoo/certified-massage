@@ -12,9 +12,11 @@ dist/
 coverage/
 
 data/raw/*
+data/processed/*.json
 data/cache/*
 data/logs/*
 
 !data/raw/.gitkeep
+!data/processed/shops.geo.json
 !data/cache/.gitkeep
 !data/logs/.gitkeep
