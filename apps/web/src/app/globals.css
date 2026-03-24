@@ -151,6 +151,66 @@ code {
   grid-template-columns: 2fr 1fr;
 }
 
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 250, 241, 0.82);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+
+.filter-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.filter-count {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(91, 63, 35, 0.12);
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.filter-reset {
+  flex-shrink: 0;
+  min-height: 42px;
+  border: 1px solid rgba(91, 63, 35, 0.14);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-reset:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .service-grid {
   display: grid;
   gap: 16px;
@@ -363,6 +423,11 @@ code {
   .content-grid,
   .control-grid {
     grid-template-columns: 1fr;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .hero-card h1 {
