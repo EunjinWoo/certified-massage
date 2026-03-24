@@ -81,7 +81,7 @@ def command_geocode() -> None:
     settings = load_settings()
     records = read_dataset(CLEAN_DATA_PATH)
     cache = read_json(GEOCODE_CACHE_PATH, default={})
-    geocoded, cache, failures = apply_geocoding(
+    geocoded, cache, failures, summary = apply_geocoding(
         records,
         api_key=settings.kakao_rest_api_key,
         timeout=settings.timeout,
@@ -93,6 +93,7 @@ def command_geocode() -> None:
         GEOCODE_FAILURE_PATH,
         {
             "count": len(failures),
+            "summary": summary,
             "failures": failures,
         },
     )

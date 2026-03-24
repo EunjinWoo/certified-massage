@@ -77,6 +77,7 @@ ANMAWON_BASE_URL=https://www.anmawon.com
 ANMAWON_USER_AGENT=Mozilla/5.0 ...
 ANMAWON_REQUEST_DELAY=1.2
 ANMAWON_TIMEOUT=20
+KAKAO_REST_API_KEY=your_kakao_rest_api_key
 ```
 
 ### 3. Dataset Pipeline
@@ -91,6 +92,7 @@ anmawon-crawler build-dataset
 ```
 
 실행 결과는 루트의 `data/` 디렉터리에 저장됩니다.
+`geocode` 단계는 `apps/crawler/.env`에 `KAKAO_REST_API_KEY`가 있어야 실행할 수 있습니다.
 
 ## Current Status
 

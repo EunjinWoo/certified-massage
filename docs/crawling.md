@@ -13,6 +13,7 @@
 - `data/processed/shops.cleaned.json`: 주소 정제 결과
 - `data/processed/shops.geocoded.json`: 지오코딩 결과
 - `data/processed/shops.geo.json`: 웹에서 소비하는 최종 데이터
+- `data/logs/geocode-failures.json`: 실패 항목과 요약 통계
 
 ## Validation Tips
 
