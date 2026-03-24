@@ -26,8 +26,13 @@ ADDRESS_KEYS = ("주소", "소재지", "도로명주소")
 PHONE_KEYS = ("전화번호", "전화", "연락처", "대표번호")
 
 PHONE_PATTERN = re.compile(r"0\d{1,2}-\d{3,4}-\d{4}")
+AREA_CODE_PATTERN = re.compile(r"^\d{2,3}$")
 ADDRESS_HINT_PATTERN = re.compile(
     r"(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)"
+)
+PAGE_VALUE_PATTERN = re.compile(
+    r"(?:[?&]page=|(?:go|move|fnMove)Page\(|['\"]page['\"]\s*[:=]\s*['\"]?)(\d+)",
+    re.IGNORECASE,
 )
 
 
@@ -68,20 +73,33 @@ def extract_query_values(text: str, key: str) -> List[str]:
     return sorted(values)
 
 
+def is_valid_area_code(value: str) -> bool:
+    return bool(AREA_CODE_PATTERN.fullmatch(value))
+
+
+def extract_page_values(text: str) -> List[int]:
+    values = {int(value) for value in extract_query_values(text, "page") if value.isdigit()}
+    values.update(int(match.group(1)) for match in PAGE_VALUE_PATTERN.finditer(text))
+    return sorted(values)
+
+
 def discover_area_codes(soup: BeautifulSoup) -> List[str]:
     area_codes: Set[str] = set()
 
-    for anchor in soup.select("a[href]"):
+    for anchor in soup.select("a[href], a[onclick]"):
         href = anchor.get("href", "")
         area_codes.update(extract_query_values(href, "SearchArea"))
+        onclick = anchor.get("onclick", "")
+        area_codes.update(extract_query_values(onclick, "SearchArea"))
 
-    for option in soup.select("option[value]"):
+    for option in soup.select("option[value], option[onclick]"):
         value = option.get("value", "")
         area_codes.update(extract_query_values(value, "SearchArea"))
-        if value.isdigit():
+        area_codes.update(extract_query_values(option.get("onclick", ""), "SearchArea"))
+        if is_valid_area_code(value):
             area_codes.add(value)
 
-    return sorted(code for code in area_codes if code)
+    return sorted(code for code in area_codes if is_valid_area_code(code))
 
 
 def discover_page_count(soup: BeautifulSoup) -> int:
@@ -89,9 +107,12 @@ def discover_page_count(soup: BeautifulSoup) -> int:
 
     for anchor in soup.select("a[href]"):
         href = anchor.get("href", "")
-        for value in extract_query_values(href, "page"):
-            if value.isdigit():
-                pages.add(int(value))
+        if DETAIL_PATH not in href:
+            pages.update(extract_page_values(href))
+        pages.update(extract_page_values(anchor.get("onclick", "")))
+
+    for element in soup.select("[onclick]"):
+        pages.update(extract_page_values(element.get("onclick", "")))
 
     return max(pages)
 

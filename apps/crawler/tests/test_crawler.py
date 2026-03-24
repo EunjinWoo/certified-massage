@@ -46,16 +46,19 @@ class ListParsingTest(unittest.TestCase):
               <body>
                 <a href="/FindShop/List?SearchArea=031">031</a>
                 <a href="/FindShop/List?SearchArea=02&page=2">02</a>
+                <a onclick="location.href='/FindShop/List?SearchArea=064'">제주</a>
                 <select>
                   <option value="051">부산</option>
                   <option value="/FindShop/List?SearchArea=031">경기</option>
+                  <option value="">전지역</option>
+                  <option value="1">=선택=</option>
                 </select>
               </body>
             </html>
             """
         )
 
-        self.assertEqual(discover_area_codes(soup), ["02", "031", "051"])
+        self.assertEqual(discover_area_codes(soup), ["02", "031", "051", "064"])
 
     def test_discovers_highest_page_number(self) -> None:
         soup = soup_from_html(
@@ -65,12 +68,27 @@ class ListParsingTest(unittest.TestCase):
                 <a href="/FindShop/List?page=1">1</a>
                 <a href="/FindShop/List?page=4">4</a>
                 <a href="/FindShop/List?page=12">12</a>
+                <button onclick="goPage(9)">9</button>
               </body>
             </html>
             """
         )
 
         self.assertEqual(discover_page_count(soup), 12)
+
+    def test_ignores_detail_page_params_when_counting_pages(self) -> None:
+        soup = soup_from_html(
+            """
+            <html>
+              <body>
+                <a href="/FindShop/Detail?page=77&shopId=031-0193">상세</a>
+                <a href="/FindShop/List?page=3">3</a>
+              </body>
+            </html>
+            """
+        )
+
+        self.assertEqual(discover_page_count(soup), 3)
 
     def test_extracts_unique_absolute_detail_urls(self) -> None:
         soup = soup_from_html(
