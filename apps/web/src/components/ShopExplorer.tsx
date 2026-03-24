@@ -27,6 +27,7 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
   const [query, setQuery] = useState("");
   const [areaCode, setAreaCode] = useState("all");
   const hasDataset = dataset.count > 0;
+  const trimmedQuery = query.trim();
 
   const areas = Array.from(
     new Set(dataset.shops.map((shop) => shop.areaCode).filter(Boolean))
@@ -34,7 +35,7 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
 
   const filteredShops = dataset.shops.filter((shop) => {
     const matchesArea = areaCode === "all" || shop.areaCode === areaCode;
-    const keyword = query.trim().toLowerCase();
+    const keyword = trimmedQuery.toLowerCase();
 
     if (!matchesArea) {
       return false;
@@ -59,10 +60,17 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
   const geocodedCount = dataset.shops.filter(
     (shop) => typeof shop.lat === "number" && typeof shop.lng === "number"
   ).length;
+  const hasActiveFilters = areaCode !== "all" || trimmedQuery.length > 0;
+  const selectedAreaLabel = areaCode === "all" ? "전체 지역" : getAreaFilterLabel(areaCode);
 
   const emptyMessage = hasDataset
     ? "조건에 맞는 안마원이 없습니다. 검색어나 지역을 다시 선택해보세요."
     : "아직 공개용 데이터가 준비 중입니다. 수집이 완료되면 이곳에 안마원 목록이 표시됩니다.";
+
+  function resetFilters() {
+    setQuery("");
+    setAreaCode("all");
+  }
 
   return (
     <div className="explorer-shell">
@@ -142,6 +150,33 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
         </label>
       </section>
 
+      <section className="filter-toolbar">
+        <div className="filter-summary">
+          <p className="filter-count">
+            {hasDataset
+              ? `전체 ${dataset.count}곳 중 ${filteredShops.length}곳 표시`
+              : "데이터가 준비되면 이곳에 탐색 상태가 표시됩니다."}
+          </p>
+          <div className="filter-chips">
+            <span className="filter-chip">지역: {selectedAreaLabel}</span>
+            <span className="filter-chip">
+              검색어: {trimmedQuery ? `"${trimmedQuery}"` : "없음"}
+            </span>
+            {hasDataset ? (
+              <span className="filter-chip">지도 표시 가능: {geocodedCount}곳</span>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="filter-reset"
+          onClick={resetFilters}
+          disabled={!hasActiveFilters}
+        >
+          필터 초기화
+        </button>
+      </section>
+
       <section className="content-grid">
         <div className="panel">
           <div className="panel-header">
@@ -154,7 +189,11 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
         <div className="panel">
           <div className="panel-header">
             <h2>목록</h2>
-            <p>전화번호와 상세 페이지를 함께 확인할 수 있습니다.</p>
+            <p>
+              {hasActiveFilters
+                ? "현재 조건에 맞는 안마원만 보여주고 있습니다."
+                : "전화번호와 상세 페이지를 함께 확인할 수 있습니다."}
+            </p>
           </div>
           <div className="shop-list">
             {filteredShops.length === 0 ? (
