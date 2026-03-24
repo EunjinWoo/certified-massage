@@ -69,10 +69,20 @@ function loadKakaoSdk(appKey: string): Promise<void> {
   });
 }
 
-export function KakaoMap({ shops }: { shops: Shop[] }) {
+export function KakaoMap({
+  shops,
+  selectedShopId,
+  onSelectShop
+}: {
+  shops: Shop[];
+  selectedShopId: string | null;
+  onSelectShop?: (shopId: string) => void;
+}) {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
   const mapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const markersRef = useRef<
+    Array<{ shopId: string; marker: any; infoWindow: any }>
+  >([]);
   const [sdkReady, setSdkReady] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
 
@@ -122,8 +132,9 @@ export function KakaoMap({ shops }: { shops: Shop[] }) {
       });
     }
 
-    for (const marker of markersRef.current) {
-      marker.setMap(null);
+    for (const entry of markersRef.current) {
+      entry.infoWindow.close();
+      entry.marker.setMap(null);
     }
 
     markersRef.current = [];
@@ -147,13 +158,43 @@ export function KakaoMap({ shops }: { shops: Shop[] }) {
       marker.setMap(mapRef.current);
       window.kakao.maps.event.addListener(marker, "click", () => {
         infoWindow.open(mapRef.current, marker);
+        onSelectShop?.(shop.shopId);
       });
       bounds.extend(position);
-      markersRef.current.push(marker);
+      markersRef.current.push({
+        shopId: shop.shopId,
+        marker,
+        infoWindow
+      });
     }
 
     mapRef.current.setBounds(bounds);
-  }, [sdkReady, shops]);
+  }, [onSelectShop, sdkReady, shops]);
+
+  useEffect(() => {
+    if (!sdkReady || !window.kakao?.maps || !mapRef.current) {
+      return;
+    }
+
+    for (const entry of markersRef.current) {
+      entry.infoWindow.close();
+    }
+
+    if (!selectedShopId) {
+      return;
+    }
+
+    const selectedEntry = markersRef.current.find(
+      (entry) => entry.shopId === selectedShopId
+    );
+
+    if (!selectedEntry) {
+      return;
+    }
+
+    selectedEntry.infoWindow.open(mapRef.current, selectedEntry.marker);
+    mapRef.current.panTo(selectedEntry.marker.getPosition());
+  }, [sdkReady, selectedShopId]);
 
   if (!appKey) {
     return (

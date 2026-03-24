@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { KakaoMap } from "@/components/KakaoMap";
 import { getAreaFilterLabel, getAreaLabel } from "@/lib/regions";
@@ -26,6 +26,7 @@ function formatDate(value: string | null): string {
 export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
   const [query, setQuery] = useState("");
   const [areaCode, setAreaCode] = useState("all");
+  const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const hasDataset = dataset.count > 0;
   const trimmedQuery = query.trim();
 
@@ -60,6 +61,12 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
   const geocodedCount = dataset.shops.filter(
     (shop) => typeof shop.lat === "number" && typeof shop.lng === "number"
   ).length;
+  const selectedShop =
+    filteredShops.find((shop) => shop.shopId === selectedShopId) ?? null;
+  const selectedShopHasCoordinates =
+    !!selectedShop &&
+    typeof selectedShop.lat === "number" &&
+    typeof selectedShop.lng === "number";
   const hasActiveFilters = areaCode !== "all" || trimmedQuery.length > 0;
   const selectedAreaLabel = areaCode === "all" ? "전체 지역" : getAreaFilterLabel(areaCode);
 
@@ -71,6 +78,21 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
     setQuery("");
     setAreaCode("all");
   }
+
+  useEffect(() => {
+    if (filteredShops.length === 0) {
+      setSelectedShopId(null);
+      return;
+    }
+
+    const stillVisible = filteredShops.some((shop) => shop.shopId === selectedShopId);
+
+    if (stillVisible) {
+      return;
+    }
+
+    setSelectedShopId(filteredShops[0].shopId);
+  }, [filteredShops, selectedShopId]);
 
   return (
     <div className="explorer-shell">
@@ -181,9 +203,19 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
         <div className="panel">
           <div className="panel-header">
             <h2>지도</h2>
-            <p>검색 결과 {filteredShops.length}곳</p>
+            <p>
+              {selectedShop
+                ? selectedShopHasCoordinates
+                  ? `${selectedShop.name || "선택된 안마원"} 위치를 지도에서 확인 중입니다.`
+                  : `${selectedShop.name || "선택된 안마원"}은 아직 좌표가 없어 목록에서만 확인할 수 있습니다.`
+                : `검색 결과 ${filteredShops.length}곳`}
+            </p>
           </div>
-          <KakaoMap shops={filteredShops} />
+          <KakaoMap
+            shops={filteredShops}
+            selectedShopId={selectedShopId}
+            onSelectShop={setSelectedShopId}
+          />
         </div>
 
         <div className="panel">
@@ -200,39 +232,60 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
               <div className="empty-list">{emptyMessage}</div>
             ) : null}
 
-            {filteredShops.map((shop) => (
-              <article key={shop.shopId} className="shop-card">
-                <div className="shop-card-top">
-                  <div>
-                    <h3>{shop.name || "이름 미상"}</h3>
-                    <p>{shop.addressNormalized || shop.addressRaw || "주소 미상"}</p>
-                  </div>
-                  <span className="shop-chip">{getAreaLabel(shop.areaCode)}</span>
-                </div>
-                <dl className="shop-meta">
-                  <div>
-                    <dt>전화</dt>
-                    <dd>{shop.phone || "없음"}</dd>
-                  </div>
-                  <div>
-                    <dt>shopId</dt>
-                    <dd>{shop.shopId}</dd>
-                  </div>
-                  <div>
-                    <dt>지오코딩</dt>
-                    <dd>{shop.geocodeStatus}</dd>
-                  </div>
-                </dl>
-                <a
-                  href={shop.detailUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="detail-link"
+            {filteredShops.map((shop) => {
+              const isSelected = shop.shopId === selectedShopId;
+              const hasCoordinates =
+                typeof shop.lat === "number" && typeof shop.lng === "number";
+
+              return (
+                <article
+                  key={shop.shopId}
+                  className={`shop-card${isSelected ? " shop-card-selected" : ""}`}
                 >
-                  상세 페이지 열기
-                </a>
-              </article>
-            ))}
+                  <div className="shop-card-top">
+                    <div>
+                      <h3>{shop.name || "이름 미상"}</h3>
+                      <p>{shop.addressNormalized || shop.addressRaw || "주소 미상"}</p>
+                    </div>
+                    <span className="shop-chip">{getAreaLabel(shop.areaCode)}</span>
+                  </div>
+                  <dl className="shop-meta">
+                    <div>
+                      <dt>전화</dt>
+                      <dd>{shop.phone || "없음"}</dd>
+                    </div>
+                    <div>
+                      <dt>shopId</dt>
+                      <dd>{shop.shopId}</dd>
+                    </div>
+                    <div>
+                      <dt>지오코딩</dt>
+                      <dd>{shop.geocodeStatus}</dd>
+                    </div>
+                  </dl>
+                  <div className="shop-actions">
+                    <button
+                      type="button"
+                      className={`select-link${isSelected ? " select-link-active" : ""}`}
+                      onClick={() => setSelectedShopId(shop.shopId)}
+                    >
+                      {hasCoordinates ? "지도에서 보기" : "목록에서 보기"}
+                    </button>
+                    {!hasCoordinates ? (
+                      <span className="shop-note">좌표 준비 중</span>
+                    ) : null}
+                  </div>
+                  <a
+                    href={shop.detailUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="detail-link"
+                  >
+                    상세 페이지 열기
+                  </a>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
