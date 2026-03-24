@@ -4,9 +4,14 @@
   "workspaces": [
     "apps/web"
   ],
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2"
+  },
   "scripts": {
     "dev:web": "npm --prefix apps/web run dev",
     "build:web": "npm --prefix apps/web run build",
-    "lint:web": "npm --prefix apps/web run lint"
+    "lint:web": "npm --prefix apps/web run lint",
+    "lint:commit": "commitlint --from=HEAD~1 --to=HEAD"
   }
 }

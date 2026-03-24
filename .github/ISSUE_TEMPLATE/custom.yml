@@ -1,0 +1,110 @@
+name: "🚦 Custom Issue Template"
+description: 커스텀 이슈 템플릿
+title: "[Issue] "
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: "### Description 📄"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 작업 설명
+      description: 무엇을 왜 하려는지 적어주세요.
+      placeholder: 예) 안마원 상세 페이지 파싱 로직을 보완해 주소 누락 케이스를 줄입니다.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "---"
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category 🧩
+      description: 작업 성격에 맞는 타입을 선택해주세요.
+      options:
+        - Setting
+        - Feature
+        - BugFix
+        - Docs
+        - Performance
+        - Refactor
+        - Test
+        - Chore
+        - Deploy
+        - CI
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal 🎯
+      description: 이 작업이 끝나면 어떤 상태가 되어야 하는지 적어주세요.
+      placeholder: 예) crawl 결과에서 주소, 전화번호, shopId가 안정적으로 저장됩니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria ✅
+      description: 완료 조건을 체크리스트로 적어주세요.
+      placeholder: |
+        - [ ] 목록 페이지에서 shopId를 모두 수집한다.
+        - [ ] 상세 페이지에서 주소와 전화번호를 병합한다.
+        - [ ] 테스트 또는 수동 검증 방법을 남긴다.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "---"
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks 🏃🏻
+      description: 이번 작업에서 실제로 할 일을 적어주세요.
+      placeholder: |
+        - [ ] Task 1
+        - [ ] Task 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Plan 🧪
+      description: 어떻게 검증할지 적어주세요.
+      placeholder: |
+        - crawler 테스트 실행
+        - 웹 빌드 확인
+        - 수동 페이지 확인
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "---"
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References 📚(Optional)
+      description: 관련 이슈, 링크, 디자인, 문서가 있다면 적어주세요.
+      placeholder: 예) Figma 링크, 참고 페이지, 관련 이슈 번호
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Final Checklist ☑️
+      options:
+        - label: 중복 이슈가 없는지 확인했습니다.
+          required: true
+        - label: 제목과 본문을 지금 작업 범위에 맞게 작성했습니다.
+          required: true

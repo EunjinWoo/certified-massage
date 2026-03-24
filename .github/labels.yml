@@ -1,0 +1,35 @@
+- name: Test
+  color: "1f883d"
+  description: Add or update tests to verify functionality
+
+- name: Setting
+  color: "cfd3d7"
+  description: Project configuration or environment setup
+
+- name: Feature
+  color: "f9c513"
+  description: Developing or implementing a new feature
+
+- name: Deploy
+  color: "3db9ea"
+  description: Deployment, infrastructure, or release related changes
+
+- name: BugFix
+  color: "f85149"
+  description: Fixing bugs or unexpected behavior
+
+- name: Docs
+  color: "1f6feb"
+  description: Documentation improvements or additions
+
+- name: Performance
+  color: "d96df0"
+  description: Improving performance, efficiency, or resource usage
+
+- name: Refactor
+  color: "b8d8a8"
+  description: Code restructuring without changing external behavior
+
+- name: Chore
+  color: "d8b4f8"
+  description: Maintenance tasks that do not affect application logic

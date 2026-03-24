@@ -90,3 +90,9 @@ anmawon-crawler build-dataset
 - 데이터 스키마 초안 생성
 
 실제 셀렉터 보정과 주소 보정 규칙은 사이트 HTML을 보면서 추가로 다듬으면 됩니다.
+
+## Team Workflow
+
+- 이슈/PR 템플릿: `.github/`
+- 기여 규칙: `CONTRIBUTING.md`
+- 라벨 스펙: `.github/labels.yml`

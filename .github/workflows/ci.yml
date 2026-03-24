@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  branch-name:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate branch naming
+        run: |
+          echo "Checking branch: ${{ github.head_ref }}"
+          echo "${{ github.head_ref }}" | grep -E '^(feat|fix|docs|refactor|test|chore|ci|perf|setting|deploy)/#[0-9]+-[a-z0-9-]+$'
+
+  pr-template:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const requiredHeadings = [
+              "### Related Issue 🧵",
+              "### Summary 📌",
+              "### Task Details 🚩",
+              "### Validation ✅",
+              "### Review Requirements 💬(Optional)"
+            ];
+
+            for (const heading of requiredHeadings) {
+              if (!body.includes(heading)) {
+                core.setFailed(`Missing required PR section: ${heading}`);
+                return;
+              }
+            }
+
+            if (!/Closes\s+#\d+/i.test(body)) {
+              core.setFailed("PR body must include a linked issue in the format `Closes #123`.");
+              return;
+            }
+
+            if (body.includes("작업 1") || body.includes("작업 2")) {
+              core.setFailed("Replace placeholder task items in `Task Details 🚩`.");
+              return;
+            }
+
+            if (body.includes("무엇을 수정했는지 적어주세요") || body.includes("왜 필요한지 적어주세요")) {
+              core.setFailed("Replace placeholder text in `Summary 📌`.");
+              return;
+            }
+
+            const checkedValidation = body.match(/- \[x\] .+/gi) || [];
+            if (checkedValidation.length === 0) {
+              core.setFailed("At least one checked item is required in `Validation ✅`.");
+            }
+
+  crawler-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install crawler dependencies
+        working-directory: apps/crawler
+        run: pip install -e .
+
+      - name: Run crawler tests
+        run: PYTHONPATH=apps/crawler/src python -m unittest discover -s apps/crawler/tests
+
+  web-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: npm install
+
+      - name: Run lint
+        working-directory: apps/web
+        run: npm run lint
+
+      - name: Run build
+        working-directory: apps/web
+        run: npm run build
+
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Lint commit messages
+        run: npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
