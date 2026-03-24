@@ -94,6 +94,33 @@ code {
   color: var(--ink-muted);
 }
 
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hero-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(166, 75, 42, 0.08);
+  border: 1px solid rgba(166, 75, 42, 0.12);
+  color: #7a341c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.hero-status {
+  margin: 16px 0 0;
+  max-width: 60ch;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
 .hero-stats {
   margin: 0;
   display: grid;
@@ -122,6 +149,31 @@ code {
   display: grid;
   gap: 16px;
   grid-template-columns: 2fr 1fr;
+}
+
+.service-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.service-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 250, 241, 0.82);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+
+.service-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.service-card p {
+  margin: 10px 0 0;
+  line-height: 1.65;
+  color: var(--ink-muted);
 }
 
 .control-card {
@@ -307,6 +359,7 @@ code {
 
 @media (max-width: 1024px) {
   .hero-card,
+  .service-grid,
   .content-grid,
   .control-grid {
     grid-template-columns: 1fr;
