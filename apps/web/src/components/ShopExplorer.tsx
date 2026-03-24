@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { KakaoMap } from "@/components/KakaoMap";
+import { getAreaFilterLabel, getAreaLabel } from "@/lib/regions";
 import type { ShopDataset } from "@/lib/types";
 
 function formatDate(value: string | null): string {
@@ -96,7 +97,7 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
         </label>
 
         <label className="control-card">
-          <span>지역 코드</span>
+          <span>지역</span>
           <select
             value={areaCode}
             onChange={(event) => setAreaCode(event.target.value)}
@@ -104,7 +105,7 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
             <option value="all">전체</option>
             {areas.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {getAreaFilterLabel(value)}
               </option>
             ))}
           </select>
@@ -139,7 +140,7 @@ export function ShopExplorer({ dataset }: { dataset: ShopDataset }) {
                     <h3>{shop.name || "이름 미상"}</h3>
                     <p>{shop.addressNormalized || shop.addressRaw || "주소 미상"}</p>
                   </div>
-                  <span className="shop-chip">{shop.areaCode || "미분류"}</span>
+                  <span className="shop-chip">{getAreaLabel(shop.areaCode)}</span>
                 </div>
                 <dl className="shop-meta">
                   <div>
