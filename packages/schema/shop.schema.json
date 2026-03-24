@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/shop.schema.json",
+  "title": "Anmawon Dataset",
+  "type": "object",
+  "required": [
+    "generatedAt",
+    "count",
+    "shops"
+  ],
+  "properties": {
+    "generatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "shops": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/shop"
+      }
+    }
+  },
+  "$defs": {
+    "shop": {
+      "type": "object",
+      "required": [
+        "shopId",
+        "name",
+        "addressRaw",
+        "addressNormalized",
+        "phone",
+        "areaCode",
+        "sourceListPage",
+        "detailUrl",
+        "lat",
+        "lng",
+        "geocodeStatus",
+        "sourceFetchedAt"
+      ],
+      "properties": {
+        "shopId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "addressRaw": {
+          "type": "string"
+        },
+        "addressNormalized": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "areaCode": {
+          "type": "string"
+        },
+        "sourceListPage": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "detailUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "lat": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lng": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "geocodeStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "success",
+            "failed",
+            "skipped"
+          ]
+        },
+        "sourceFetchedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

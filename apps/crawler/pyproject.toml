@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anmawon-crawler"
+version = "0.1.0"
+description = "Crawler pipeline for the certified massage map project"
+requires-python = ">=3.9"
+dependencies = [
+  "beautifulsoup4>=4.12.0",
+  "httpx>=0.27.0",
+  "python-dotenv>=1.0.0"
+]
+
+[project.scripts]
+anmawon-crawler = "anmawon_crawler.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
