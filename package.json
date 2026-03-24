@@ -12,6 +12,9 @@
     "dev:web": "npm --prefix apps/web run dev",
     "build:web": "npm --prefix apps/web run build",
     "lint:web": "npm --prefix apps/web run lint",
+    "test:crawler": "PYTHONPATH=apps/crawler/src python3 -m unittest discover -s apps/crawler/tests",
+    "check:web": "npm --prefix apps/web run lint && npm --prefix apps/web run build",
+    "check:pr": "npm run test:crawler && npm run check:web",
     "lint:commit": "commitlint --from=HEAD~1 --to=HEAD"
   }
 }

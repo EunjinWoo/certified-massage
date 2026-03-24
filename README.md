@@ -116,4 +116,5 @@ ANMAWON_BASE_URL=http://www.anmawon.com anmawon-crawler crawl --area-code 031 --
 
 - 이슈/PR 템플릿: `.github/`
 - 기여 규칙: `CONTRIBUTING.md`
+- 빠른 작업 체크리스트: `docs/workflow.md`
 - 라벨 스펙: `.github/labels.yml`
