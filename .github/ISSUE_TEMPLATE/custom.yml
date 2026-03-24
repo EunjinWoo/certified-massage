@@ -1,12 +1,16 @@
 name: "🚦 Custom Issue Template"
 description: 커스텀 이슈 템플릿
-title: "[Issue] "
+title: ""
 labels: []
 assignees: []
 body:
   - type: markdown
     attributes:
-      value: "### Description 📄"
+      value: |
+        제목은 `Feature: ...`, `BugFix: ...`, `CI: ...` 형식을 권장합니다.
+        생성 후에는 작업자 assignee와 타입에 맞는 label을 함께 지정해주세요.
+
+        ### Description 📄
 
   - type: textarea
     id: description
